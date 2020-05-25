@@ -159,6 +159,9 @@ class Scrap:
 
 if __name__ == '__main__':
 	from _cred_private_links import links
+	from gsht_connect import Google_API_Connect
+	gsht = Google_API_Connect()
+
 	url=links['mmoney']
 	# print(url)
 	page = requests.get(url)
@@ -173,20 +176,21 @@ if __name__ == '__main__':
 			# print('Getting Call Date on:', call_date['value'])
 			soup_du_jour = Scrap().MMoneyByDate(driver=driver, date_value=call_date['value'])
 			# pprint.pprint(soup_du_jour)
+
+			print(master_call_list)
+			gsht.gsht_update(spreadsheetId=links['google_sheet_id'], action='Add', data_values=master_call_list, rangeName=links['sheet_name'], sheet_title_string=links['sheet_name'])
+			master_call_list = []
+
 			time.sleep(Scrap().randelay())
 			i += 1
 		else: 
 			print('Skipping:', call_date.text)
 			continue
-		if i > 2: 
-			break
+		# if i > 2: 
+		# 	break
 
 	pprint.pprint(soup_du_jour)
 	driver.quit()  # alphabet_soup
 
 # http://meumobi.github.io/stocks%20apis/2016/03/13/get-realtime-stock-quotes-yahoo-finance-api.html
 
-	from gsht_connect import Google_API_Connect
-	gsht = Google_API_Connect()
-	print(master_call_list)
-	gsht.gsht_update(spreadsheetId=links['google_sheet_id'], action='Add', data_values=master_call_list, rangeName=links['sheet_name'], sheet_title_string=links['sheet_name'])
