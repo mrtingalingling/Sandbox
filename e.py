@@ -133,7 +133,6 @@ class Scrap:
 		call_list = soup.find('table').find_all('tr')
 		call_date = soup.select_one('#leftPanel > p').text
 		print(call_date)
-		daily_call_list = []
 		for call_list_item in call_list:
 			if not call_list_item.find('td'): 
 				continue
@@ -145,15 +144,14 @@ class Scrap:
 				'Call': call_list_item.find_all('td')[3].find('img')['alt'], 
 				'Call Price': call_list_item.find_all('td')[4].text
 			}
-			daily_call_list.append([
-				call_list_items_dict[ticker], 
+			master_call_list.append([
+				ticker, 
 				call_list_items_dict[ticker][date_value]['Company Name'], 
-				call_list_items_dict[ticker][date_value], 
+				date_value, 
 				call_list_items_dict[ticker][date_value]['Segment'], 
 				call_list_items_dict[ticker][date_value]['Call'], 
 				call_list_items_dict[ticker][date_value]['Call Price']
 			])
-		master_call_list.append(daily_call_list)
 		# print(call_list_items_dict)
 
 		return call_list_items_dict
@@ -190,12 +188,5 @@ if __name__ == '__main__':
 
 	from gsht_connect import Google_API_Connect
 	gsht = Google_API_Connect()
-	service = gsht.gsht_service
-
-	# spreadsheetId = links['google_sheet_id'] 
-	# rangeName = links['sheet_name'] + '!A2:F'
-	# value_input_option = 'USER_ENTERED'
-	# value_range_body = {'values': master_call_list}
-	# request = service.spreadsheets().values().append(spreadsheetId=spreadsheetId, range=rangeName, valueInputOption=value_input_option, body=value_range_body)
-	# response = request.execute()
-	# print(response)
+	print(master_call_list)
+	gsht.gsht_update(spreadsheetId=links['google_sheet_id'], action='Add', data_values=master_call_list, rangeName=links['sheet_name'], sheet_title_string=links['sheet_name'])
