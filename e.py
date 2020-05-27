@@ -42,7 +42,6 @@ chrome_options.add_argument("disable-infobars")  # Disabling infobars
 chrome_options.add_argument("--disable-extensions")  # Disabling extensions
 driver = webdriver.Chrome(executable_path='/home/ting/Envs/chromedriver', options=chrome_options)
 call_list_items_dict = defaultdict(dict)  # Making this Global Variable 
-master_call_list = []
 
 
 class Scrap:
@@ -53,27 +52,13 @@ class Scrap:
 
 		self.parse_args = self._parse_args()
 
-		# try:
-		# 	self.conn = kwargs.get('conn', None)
-		# 	# with psycopg2.connect(db_name) as self.conn:
-		# 	self.cur = self.conn.cursor()
-		# 	self.db_check()
-		# 	while True:
-		# 		self.get_financial_data()
-		# 		self.load_data_psql()
-		# 		if datetime.datetime.now().time() >= datetime.time(hour=16, minute=15, second=0, microsecond=0):
-		# 			break
-		# except Exception as e:
-		# 	log.error('Error! ' + str(e))
-		# 	return
-
 	def _parse_args(self):
 		parser = ArgumentParser()
 		args, trash = parser.parse_known_args()
 
 		return args
 
-	# Cramer Starts
+	# MMoney Starts
 	def randelay(self): 
 		'''Make the delay more realistic by randomizing the wait time'''
 		return random.randrange(500000, 1500000)/100000
@@ -129,7 +114,8 @@ class Scrap:
 		'''
 		soup = BeautifulSoup(html, 'lxml')
 
-		# Cramer
+		# MMoney
+		master_call_list = []
 		call_list = soup.find('table').find_all('tr')
 		call_date = soup.select_one('#leftPanel > p').text
 		print(call_date)
@@ -154,7 +140,7 @@ class Scrap:
 			])
 		# print(call_list_items_dict)
 
-		return call_list_items_dict
+		return call_list_items_dict, master_call_list
 
 
 if __name__ == '__main__':
@@ -174,12 +160,11 @@ if __name__ == '__main__':
 			print('-------')
 			print('Getting... ')
 			# print('Getting Call Date on:', call_date['value'])
-			soup_du_jour = Scrap().MMoneyByDate(driver=driver, date_value=call_date['value'])
+			soup_du_jour, alphabet_soup = Scrap().MMoneyByDate(driver=driver, date_value=call_date['value'])
 			# pprint.pprint(soup_du_jour)
 
-			print(master_call_list)
-			gsht.gsht_update(spreadsheetId=links['google_sheet_id'], action='Add', data_values=master_call_list, rangeName=links['sheet_name'], sheet_title_string=links['sheet_name'])
-			master_call_list = []
+			print(alphabet_soup)
+			gsht.gsht_update(spreadsheetId=links['google_sheet_id'], action='Add', data_values=alphabet_soup, rangeName=links['sheet_name'], sheet_title_string=links['sheet_name'])
 
 			time.sleep(Scrap().randelay())
 			i += 1
